@@ -36,15 +36,15 @@ public:
 	int get_score();
 	void print_board();
 private:
+	int old_tiles[4][4] = { 0 }; //Used to see if a move actually changed anything on the board
 	void transpose(int board[4][4]);
 	void reverse(int board[4][4]);
+	bool new_tile();
 };
 
 //void print_board(int board[4][4]);
 
 int main() {
-	int start_board[4][4] = { 0 };
-	int end_board[4][4] = { 0 };
 	int move_type = -1;
 
 	Board board;
@@ -68,6 +68,39 @@ int main() {
 	}
 
 	while (1) {};
+}
+
+bool Board::new_tile() {
+	int potential_tiles = 0;
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			if (tiles[i][j] == 0) potential_tiles++;
+		}
+	}
+
+	srand(clock());
+	int pos, v;
+	pos = rand() % potential_tiles;
+
+	// 90% for 2 10% for 4.
+	v = rand() % 100 < 89 ? 2 : 4;
+
+	int zero_nr = 0;
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			if (tiles[i][j] == 0) {
+				if (zero_nr == pos) {
+					tiles[i][j] = v;
+					return 1;
+				}
+				else zero_nr++;
+			}
+		}
+	}
+
+	return 0;
 }
 
 bool Board::can_move() {
@@ -118,6 +151,7 @@ void Board::do_move(int move_type) {
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			start_board[i][j] = tiles[i][j];
+			old_tiles[i][j] = tiles[i][j];
 			tiles[i][j] = 0;
 		}
 	}
@@ -176,6 +210,21 @@ void Board::do_move(int move_type) {
 		reverse(tiles);
 		transpose(tiles);
 	}
+
+	bool board_changed = 0;
+
+	//Check if the board has actually changed
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			if (old_tiles[i][j] != tiles[i][j]) {
+				board_changed = 1;
+				break;
+			}
+		}
+	}
+
+	//Add a new tile if the board has changed
+	if (board_changed == 1) new_tile();
 }
 
 //transpose the board so that the rows become columns and columns become rows. 
@@ -209,7 +258,7 @@ void Board::print_board() {
 		for (int col = 0; col < 4; ++col) {
 			std::cout << tiles[row][col] << " ";
 		}
-		std::cout << std::endl;
+		std::cout << std::endl << std::endl;
 	}
 }
 
