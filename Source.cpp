@@ -1,5 +1,12 @@
+/*
+	Authors	: Adam Lindberg, Daniel Trochez
+	Date	:	2018-02-02
+
+*/
+
 
 #include <iostream>
+#include <time.h>
 
 /*
 Board structure:
@@ -22,17 +29,18 @@ Fourth column consists of indices: [0-3][3]
 
 class Board {
 public:
-	int tiles[4][4] = { { 2,4,2,4 },{ 8,16,8,16 },{ 32,64,32,64 },{ 128,256,128,256 } };
+	int tiles[4][4] = { 0 };
 	void initialize();
 	void do_move(int move_type);
 	bool can_move();
 	int get_score();
+	void print_board();
 private:
 	void transpose(int board[4][4]);
 	void reverse(int board[4][4]);
 };
 
-void print_board(int board[4][4]);
+//void print_board(int board[4][4]);
 
 int main() {
 	int start_board[4][4] = { 0 };
@@ -40,14 +48,17 @@ int main() {
 	int move_type = -1;
 
 	Board board;
+	board.initialize();
+	board.print_board();
 
+	
 	while (1) {
 		if (board.can_move()) { //If AI can still move, AI continues
 			std::cin >> move_type; //REPLACE this with AI later
 
 			board.do_move(move_type);
 
-			print_board(board.tiles);
+			board.print_board();
 		}
 		else { //If AI cannot move, the game has ended
 			std::cout << "Score: " << board.get_score() << std::endl;
@@ -80,7 +91,26 @@ int Board::get_score() {
 }
 
 void Board::initialize() {
-	int temp[4][4] = { { 2,4,2,4 }, { 8,16,8,16 }, { 32,64,32,64 }, { 128,256,128,256 } };
+	srand(clock());
+	int pos1, pos2, v1, v2, r1, c1, r2, c2;
+	pos1 = rand() % 16;
+	pos2 = rand() % 15;
+	pos2 = pos2 < pos1 ? pos2 : pos2 + 1;
+
+	r1 = pos1 / 4;
+	c1 = pos1 % 4;
+	r2 = pos2 / 4;
+	c2 = pos2 % 4;
+
+	// 90% for 2 10% for 4.
+	v1 = rand() % 100 < 89 ? 2 : 4;
+	v2 = rand() % 100 < 89 ? 2 : 4;
+
+	tiles[r1][c1] = v1;
+	tiles[r2][c2] = v2;
+
+	//std::cout << "(" << r1 << ", " << c1 << ")   (" << r2 << ", " << c2 << ")\n";
+
 }
 
 void Board::do_move(int move_type) {
@@ -88,8 +118,10 @@ void Board::do_move(int move_type) {
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			start_board[i][j] = tiles[i][j];
+			tiles[i][j] = 0;
 		}
 	}
+
 
 	if (move_type == 1) //up
 		transpose(start_board);
@@ -107,7 +139,7 @@ void Board::do_move(int move_type) {
 		int col = 0;
 		while (col < 4) {
 			int next_col = col + 1;
-			
+
 			int current_cell = start_board[row][col];
 			if (current_cell == 0) {
 				col++;
@@ -128,19 +160,19 @@ void Board::do_move(int move_type) {
 			if (next_cell == current_cell) { // they are the same.
 				tiles[row][out_col] = current_cell + next_cell;
 				out_col++;
-				col = next_col+1;
+				col = next_col + 1;
 			}
 			else {
 				tiles[row][out_col] = current_cell;
 				out_col++;
 				col = next_col;
-			}			
+			}
 		}
 	}
 
-	if(move_type == 1) transpose(tiles);
-	if(move_type == 2) reverse(tiles);
-	if(move_type == 3) {
+	if (move_type == 1) transpose(tiles);
+	if (move_type == 2) reverse(tiles);
+	if (move_type == 3) {
 		reverse(tiles);
 		transpose(tiles);
 	}
@@ -172,11 +204,12 @@ void Board::reverse(int board[4][4]) {
 
 }
 
-void print_board(int board[4][4]) {
+void Board::print_board() {
 	for (int row = 0; row < 4; ++row) {
 		for (int col = 0; col < 4; ++col) {
-			std::cout << board[row][col] << " ";
+			std::cout << tiles[row][col] << " ";
 		}
 		std::cout << std::endl;
 	}
 }
+
