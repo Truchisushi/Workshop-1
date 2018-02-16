@@ -26,7 +26,6 @@ bool Board::new_tile() {
 		}
 	}
 
-	srand(clock());
 	int pos, v;
 	pos = rand() % potential_tiles;
 
@@ -97,7 +96,6 @@ void Board::initialize() {
 	}
 	score = 0;
 
-	srand(clock());
 	int pos1, pos2, v1, v2, r1, c1, r2, c2;
 	pos1 = rand() % 16;
 	pos2 = rand() % 15;
@@ -120,6 +118,7 @@ void Board::initialize() {
 }
 
 void Board::do_move(int move_type) {
+	last_move = move_type;
 	int start_board[4][4];
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
@@ -236,14 +235,16 @@ void Board::print_board() {
 	}
 }
 
-int Board::test_move(int move_type) {
+int Board::test_move(int move_type, bool output_bool) {
 	int current_score = score;
+	bool board_changed = 0;
 	//std::cout << "In test move, before!\n\n";
 	//print_board();
 	do_move(move_type);
 
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
+			if (tiles[i][j] != old_tiles[i][j]) board_changed = 1;
 			tiles[i][j] = old_tiles[i][j];
 		}
 	}
@@ -253,7 +254,8 @@ int Board::test_move(int move_type) {
 
 	int score_dif = score - current_score;
 	score = current_score;
-	return score_dif;
+	if(output_bool == 0) return score_dif;
+	else return board_changed;
 }
 
 

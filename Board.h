@@ -30,7 +30,8 @@ public:
 	int get_score();
 	int get_best_tile();
 	void print_board();
-	int test_move(int move_type);
+	int test_move(int move_type, bool output_bool = 0);
+	int last_move = 0;
 	~Board();
 private:
 	int score = 0;
